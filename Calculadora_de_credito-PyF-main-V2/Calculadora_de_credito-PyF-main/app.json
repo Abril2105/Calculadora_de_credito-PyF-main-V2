@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Pareja_y_Finanzas",
+    "slug": "Pareja_y_Finanzas",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "Pareja_y_Finanzas"
+}
