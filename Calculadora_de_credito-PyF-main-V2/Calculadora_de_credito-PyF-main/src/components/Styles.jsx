@@ -28,7 +28,7 @@ const styles = StyleSheet.create ({
         padding: 10,
         backgroundColor: 'white',
         borderRadius: 10
-      },
+    },
     picker: {
         backgroundColor: 'white',
         height: 40,
@@ -39,21 +39,36 @@ const styles = StyleSheet.create ({
         marginTop: 10
     },
     pickerText: {
-        textAlignVertical: 'center'
+        textAlignVertical: "center"
+    },
+    viewButtons: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+    },
+    viewButtons: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
     },
     button: {
         backgroundColor: '#4C97C7',
         borderRadius: 5,
-        alignSelf: 'center',
-        alignItems: 'center',
+        alignItems: "center",
         width: 90,
         height: 50,
-        marginTop: 30
+        marginTop: 30,
+    },
+    buttonLimpiar: {
+        backgroundColor: "#BD75C2",
+    },
+    buttonLimpiar: {
+        backgroundColor: "#BD75C2",
     },
     buttonText: {
         textAlign: 'center',
         lineHeight: 50,
-        fontSize: 17
+        fontSize: 18,
+        color: "white",
+        fontWeight: "900"
     },
     results: {
         color: '#BD75C2',
@@ -66,8 +81,47 @@ const styles = StyleSheet.create ({
         fontSize: 20,
         marginLeft: 5,
         marginTop: 35,
-        alignSelf : 'center'
-    }
-})
+        alignSelf: "center",
+    },
+
+    /* Componentes Menu */
+    menuTitleText: {
+        fontSize: 34,
+        width: "78%",
+        fontWeight: "800",
+        color: "white",
+    },
+
+    menuContainer: {
+        backgroundColor: "#BD75C2",
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "space-evenly",
+    },
+
+    /* Componentes BotonMenu */
+    buttonMenu: {
+        borderRadius: 20,
+        overflow: "hidden",
+    },
+    buttonMenuView: {
+        backgroundColor: "#040404",
+        width: "78%",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 15,
+    },
+    buttonMenuText: {
+        color: "white",
+        fontSize: 25,
+        textAlign: "center",
+        flex: 1,
+    },
+    imgButtonMenu: {
+        height: 64,
+        width: 64,
+    },
+});
 
 export default styles
