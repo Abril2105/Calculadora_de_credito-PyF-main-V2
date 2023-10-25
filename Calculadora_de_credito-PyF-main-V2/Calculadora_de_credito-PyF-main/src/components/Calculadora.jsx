@@ -98,7 +98,7 @@ const Calculadora = () => {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <View>
+      <View style= {styles.container}>
         <Text style={styles.title}>Calculadora de Crédito</Text>
         <Text style={styles.subHeader}>Monto:</Text>
         <TextInput
