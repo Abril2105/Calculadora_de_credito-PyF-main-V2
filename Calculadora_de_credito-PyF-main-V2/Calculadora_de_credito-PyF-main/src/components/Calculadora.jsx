@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import styles from "./Styles";
 
@@ -18,16 +18,37 @@ const Calculadora = () => {
   const [mostrarResultados, setMostrarResultados] = useState(false);
 
   const formatInputValue = (text, stateSetter) => {
-    
     if (typeof text !== "undefined") {
-        
-        const cleanedText = text.replace(/[^0-9]/g, '');
-      
-        const formattedText = cleanedText.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        stateSetter(formattedText);
+      // Eliminar caracteres no numéricos, excepto comas y puntos
+      const cleanedText = text.replace(/[^\d.,]/g, '');
+  
+      // Reemplazar comas múltiples por una sola coma
+      const formattedText = cleanedText.replace(/,+/g, ',');
+  
+      // Reemplazar puntos por espacios en blanco y eliminar espacios en blanco
+      const normalizedText = formattedText.replace(/\./g, '').replace(/\s/g, '');
+  
+      // Dividir el número en parte entera y parte decimal
+      const [integerPart, decimalPart] = normalizedText.split(',');
+  
+      // Formatear la parte entera con puntos para los miles
+      const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  
+      // Reunir la parte entera y la parte decimal en el resultado final
+      const result = decimalPart ? formattedIntegerPart + ',' + decimalPart : formattedIntegerPart;
+  
+      stateSetter(result);
     }
-};
-
+  };
+  
+  const formatPlazoValue = (text, stateSetter) => {
+    if (typeof text !== "undefined") {
+      // Eliminar caracteres no numéricos
+      const cleanedText = text.replace(/[^0-9]/g, '');
+      stateSetter(cleanedText);
+    }
+  };
+  
   const Calculo = () => {
     let plazoMeses;
 
@@ -37,21 +58,21 @@ const Calculadora = () => {
       plazoMeses = plazo;
     }
 
-    const intrestest = interes / 12;
+    const intrestest = parseFloat(interes) / 12;
     const interesMensual = intrestest / 100;
-    const calcmontointres = monto.replace(/./g, '') * interesMensual;  
+    const calcmontointres = parseFloat(monto.replace(/\./g, '').replace(',', '.')) * interesMensual;  
     const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
-    const calculoCuotaMensual = calcmontointres / calcintersplazo;
-    const calculoTotalPago = calculoCuotaMensual * plazoMeses;
-    const calculoTotalInteres = calculoTotalPago - monto.replace(/./g, ''); 
+    const calculoCuotaMensual = parseFloat(calcmontointres) / parseFloat(calcintersplazo);
+    const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);    
+    const calculoTotalInteres = calculoTotalPago - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
 
     ////calcular nuevo total con aponio
 
-    let temp1 = parseInt(abono.replace(/./g, '')); 
-    let temp2 = parseInt(calculoCuotaMensual);
+    let temp1 = parseFloat(abono.replace(/\./g, '')); 
+    let temp2 = parseFloat(calculoCuotaMensual);    
     const nuevoCoutaMensual = temp1 + temp2;
 
-    const test6 = monto.replace(/./g, '') * interesMensual;
+    const test6 = parseFloat(monto.replace(/./g, '')) * interesMensual;
     const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - (test6)));
     const bottom = (Math.log(1 + interesMensual));
     const nuevoPagos = top / bottom;
@@ -64,7 +85,7 @@ const Calculadora = () => {
       nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
     }
 
-    const nuevoTotalInteres = nuevoTotalPagos - monto.replace(/./g, ''); 
+    const nuevoTotalInteres = nuevoTotalPagos - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
     const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
 
     //// calcular meses salvados
@@ -88,13 +109,28 @@ const Calculadora = () => {
       setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTiempoSalvado(mesesSalvado.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setMostrarResultados(true);
-    } else {1
+    } else {
       setCuotaMensual(calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalPago(calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setMostrarResultados(true);
     }
   }
+
+  const borrar = () => {
+      setMonto("");
+      setInteres("");
+      setPlazo("");
+      setUnidad("");
+      setSeguro("");
+      setAbono("");
+      setCuotaMensual("");
+      setTotalPago("");
+      setTotalInteres("");
+      setInteresSalvado("");
+      setTiempoSalvado("");
+      setMostrarResultados(false);
+    };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -114,6 +150,7 @@ const Calculadora = () => {
           style={styles.input}
           placeholder="Ingrese el Interés Anual"
           onChangeText={(text) => formatInputValue(text, setInteres)}
+          value={interes}
           keyboardType="numeric"
           maxLength={5}
         />
@@ -122,7 +159,8 @@ const Calculadora = () => {
         <TextInput
           style={styles.input}
           placeholder="Ingrese el plazo"
-          onChangeText={(text) => formatInputValue(text, setPlazo)}
+          onChangeText={(text) => formatPlazoValue(text, setPlazo)}
+          value={plazo}
           keyboardType="numeric"
           maxLength={3}
         />
@@ -142,7 +180,9 @@ const Calculadora = () => {
           style={styles.input}
           placeholder="Ingrese Seguro "
           onChangeText={(text) => formatInputValue(text, setSeguro)}
+          value ={seguro}
           keyboardType="numeric"
+          maxLength={21}
         />
 
         <Text style={styles.subHeader}>Abono a capital mensual(opcional):</Text>
@@ -150,16 +190,24 @@ const Calculadora = () => {
           style={styles.input}
           placeholder="Ingrese pago extra "
           onChangeText={(text) => formatInputValue(text, setAbono)}
+          value={abono}
           keyboardType="numeric"
           maxLength={21}
         />
 
-
-        <TouchableOpacity
-          style={[styles.button]}
-          onPress={Calculo}>
-          <Text style={styles.buttonText}>Calcular</Text>
-        </TouchableOpacity>
+        <View style= {styles.viewButtons}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonLimpiar]}
+            onPress={borrar}
+          >
+            <Text style={styles.buttonText}>Borrar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button]}
+            onPress={Calculo}>
+            <Text style={styles.buttonText}>Calcular</Text>
+          </TouchableOpacity>
+        </View>
 
         {
           mostrarResultados && (
@@ -178,10 +226,10 @@ const Calculadora = () => {
 
               <Text style={styles.subHeader}>Con abono Capital:</Text>
               <Text style={styles.textoResults}>
-                Te Ahoras en Interes: <Text style={styles.results}>{'$' + interesSalvado}</Text>
+                Te ahorras en interés: <Text style={styles.results}>{'$' + interesSalvado}</Text>
               </Text>
               <Text style={styles.textoResults}>
-                Te ahora en tiempo: <Text style={styles.results}>{tiempoSalvado}</Text>
+                Te ahorra en tiempo: <Text style={styles.results}>{tiempoSalvado}</Text>
               </Text>
             </View>
           )

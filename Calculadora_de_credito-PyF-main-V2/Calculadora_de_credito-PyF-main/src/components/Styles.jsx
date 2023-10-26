@@ -37,21 +37,33 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     pickerText: {
-        textAlignVertical: "center",
+        textAlignVertical: "center"
+    },
+    viewButtons: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+    },
+    viewButtons: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
     },
     button: {
         backgroundColor: "#4C97C7",
         borderRadius: 5,
-        alignSelf: "center",
         alignItems: "center",
         width: 90,
         height: 50,
         marginTop: 30,
     },
+    buttonLimpiar: {
+        backgroundColor: "#BD75C2",
+    },
     buttonText: {
         textAlign: "center",
         lineHeight: 50,
-        fontSize: 17,
+        fontSize: 18,
+        color: "white",
+        fontWeight: "900"
     },
     results: {
         color: "#BD75C2",
@@ -93,7 +105,7 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        padding: 15
+        padding: 15,
     },
     buttonMenuText: {
         color: "white",
