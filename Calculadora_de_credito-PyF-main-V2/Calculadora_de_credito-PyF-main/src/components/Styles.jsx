@@ -1,42 +1,40 @@
-import React  from "react";
-import { Text, StyleSheet } from "react-native";
-import  Constants from "expo-constants";
+import { StyleSheet } from "react-native";
+import Constants from "expo-constants";
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#1c1c1e',
+        backgroundColor: "#1c1c1c",
         flex: 1,
     },
     title: {
-        color: '#4C97C7',
-        textAlign: 'center',
-        fontWeight: 'bold',
+        color: "#4C97C7",
+        textAlign: "center",
+        fontWeight: "bold",
         fontSize: 30,
         marginTop: Constants.statusBarHeight,
     },
     subHeader: {
-        color: 'white',
+        color: "white",
         fontSize: 20,
         marginLeft: 5,
-        marginTop: 35
-        
+        marginTop: 35,
     },
     input: {
         height: 40,
         margin: 5,
         borderWidth: 1,
         padding: 10,
-        backgroundColor: 'white',
-        borderRadius: 10
+        backgroundColor: "white",
+        borderRadius: 10,
     },
     picker: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         height: 40,
         width: 140,
         margin: 5,
         borderRadius: 10,
-        overflow: 'hidden',
-        marginTop: 10
+        overflow: "hidden",
+        marginTop: 10,
     },
     pickerText: {
         textAlignVertical: "center"
@@ -50,7 +48,7 @@ const styles = StyleSheet.create ({
         justifyContent: "space-evenly",
     },
     button: {
-        backgroundColor: '#4C97C7',
+        backgroundColor: "#4C97C7",
         borderRadius: 5,
         alignItems: "center",
         width: 90,
@@ -60,24 +58,21 @@ const styles = StyleSheet.create ({
     buttonLimpiar: {
         backgroundColor: "#BD75C2",
     },
-    buttonLimpiar: {
-        backgroundColor: "#BD75C2",
-    },
     buttonText: {
-        textAlign: 'center',
+        textAlign: "center",
         lineHeight: 50,
         fontSize: 18,
         color: "white",
         fontWeight: "900"
     },
     results: {
-        color: '#BD75C2',
+        color: "#BD75C2",
         fontSize: 20,
         marginLeft: 5,
         marginTop: 35,
     },
     textoResults: {
-        color: 'white',
+        color: "white",
         fontSize: 20,
         marginLeft: 5,
         marginTop: 35,
@@ -124,4 +119,4 @@ const styles = StyleSheet.create ({
     },
 });
 
-export default styles
+export default styles;
