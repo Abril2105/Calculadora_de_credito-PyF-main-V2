@@ -37,7 +37,7 @@ const Calculadora = () => {
       // Reunir la parte entera y la parte decimal en el resultado final
       const result = decimalPart ? formattedIntegerPart + ',' + decimalPart : formattedIntegerPart;
   
-      stateSetter(result);
+      stateSetter(text);
     }
   };
   
@@ -57,14 +57,14 @@ const Calculadora = () => {
     } else {
       plazoMeses = plazo;
     }
-
+    let montoUsuario =  parseFloat(monto.replace(/\./g, '').replace(',', '.'))
     const intrestest = parseFloat(interes) / 12;
     const interesMensual = intrestest / 100;
-    const calcmontointres = parseFloat(monto.replace(/\./g, '').replace(',', '.')) * interesMensual;  
+    const calcmontointres =montoUsuario * interesMensual;  
     const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
     const calculoCuotaMensual = parseFloat(calcmontointres) / parseFloat(calcintersplazo);
     const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);    
-    const calculoTotalInteres = calculoTotalPago - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+    const calculoTotalInteres = calculoTotalPago -montoUsuario;
 
     ////calcular nuevo total con aponio
 
@@ -72,37 +72,26 @@ const Calculadora = () => {
     let temp2 = parseFloat(calculoCuotaMensual);    
     const nuevoCoutaMensual = temp1 + temp2;
 
-    const test6 = parseFloat(monto.replace(/./g, '')) * interesMensual;
-    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - (test6)));
+    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - calcmontointres));
+
     const bottom = (Math.log(1 + interesMensual));
     const nuevoPagos = top / bottom;
 
     let nuevoTotalPagos;
-    if (unidad === 'Años') {
-      const temp = plazo * seguro;
-      nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual + temp;
-    } else {
-      nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
-    }
 
-    const nuevoTotalInteres = nuevoTotalPagos - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+    nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
+    
+
+    const nuevoTotalInteres = nuevoTotalPagos -montoUsuario;
     const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
 
     //// calcular meses salvados
+    const plazoSinAbono = montoUsuario/parseInt(calculoCuotaMensual);
+    const plazoConAbono = montoUsuario/parseInt(nuevoCoutaMensual);
 
-    const montdiv = monto.replace(/./g, '')/nuevoCoutaMensual;
-    const mesesSalvado = montdiv -plazoMeses;
+    const mesesSalvado = plazoConAbono -plazoSinAbono;
 
-    if (seguro === '' && abono === '') {
-      setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTiempoSalvado(mesesSalvado.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setMostrarResultados(true);
-    }
-
-    if (seguro !== '' || abono !== '') {
+    if (abono !== '') {
       setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
@@ -115,6 +104,9 @@ const Calculadora = () => {
       setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setMostrarResultados(true);
     }
+    
+
+  
   }
 
   const borrar = () => {
