@@ -8,7 +8,6 @@ const Calculadora = () => {
   const [interes, setInteres] = useState("");
   const [plazo, setPlazo] = useState("");
   const [unidad, setUnidad] = useState("");
-  const [seguro, setSeguro] = useState("");
   const [abono, setAbono] = useState("");
   const [cuotaMensual, setCuotaMensual] = useState("");
   const [totalPago, setTotalPago] = useState("");
@@ -16,31 +15,32 @@ const Calculadora = () => {
   const [interesSalvado, setInteresSalvado] = useState("");
   const [tiempoSalvado, setTiempoSalvado] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [mostrarAbono, setMostrarAbono] = useState(false);
 
   const formatInputValue = (text, stateSetter) => {
     if (typeof text !== "undefined") {
       // Eliminar caracteres no numéricos, excepto comas y puntos
       const cleanedText = text.replace(/[^\d.,]/g, '');
-  
+
       // Reemplazar comas múltiples por una sola coma
       const formattedText = cleanedText.replace(/,+/g, ',');
-  
+
       // Reemplazar puntos por espacios en blanco y eliminar espacios en blanco
       const normalizedText = formattedText.replace(/\./g, '').replace(/\s/g, '');
-  
+
       // Dividir el número en parte entera y parte decimal
       const [integerPart, decimalPart] = normalizedText.split(',');
-  
+
       // Formatear la parte entera con puntos para los miles
       const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  
+
       // Reunir la parte entera y la parte decimal en el resultado final
       const result = decimalPart ? formattedIntegerPart + ',' + decimalPart : formattedIntegerPart;
-  
-      stateSetter(result);
+
+      stateSetter(text);
     }
   };
-  
+
   const formatPlazoValue = (text, stateSetter) => {
     if (typeof text !== "undefined") {
       // Eliminar caracteres no numéricos
@@ -48,7 +48,7 @@ const Calculadora = () => {
       stateSetter(cleanedText);
     }
   };
-  
+
   const Calculo = () => {
     let plazoMeses;
 
@@ -57,84 +57,75 @@ const Calculadora = () => {
     } else {
       plazoMeses = plazo;
     }
-
+    let montoUsuario = parseFloat(monto.replace(/\./g, '').replace(',', '.'))
     const intrestest = parseFloat(interes) / 12;
     const interesMensual = intrestest / 100;
-    const calcmontointres = parseFloat(monto.replace(/\./g, '').replace(',', '.')) * interesMensual;  
+    const calcmontointres = montoUsuario * interesMensual;
     const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
     const calculoCuotaMensual = parseFloat(calcmontointres) / parseFloat(calcintersplazo);
-    const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);    
-    const calculoTotalInteres = calculoTotalPago - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
-
-    ////calcular nuevo total con aponio
-
-    let temp1 = parseFloat(abono.replace(/\./g, '')); 
-    let temp2 = parseFloat(calculoCuotaMensual);    
+    const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);
+    const calculoTotalInteres = calculoTotalPago - montoUsuario;
+    let temp1 = parseFloat(abono.replace(/\./g, ''));
+    let temp2 = parseFloat(calculoCuotaMensual);
     const nuevoCoutaMensual = temp1 + temp2;
 
-    const test6 = parseFloat(monto.replace(/./g, '')) * interesMensual;
-    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - (test6)));
+    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - calcmontointres));
+
     const bottom = (Math.log(1 + interesMensual));
     const nuevoPagos = top / bottom;
 
     let nuevoTotalPagos;
-    if (unidad === 'Años') {
-      const temp = plazo * seguro;
-      nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual + temp;
-    } else {
-      nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
-    }
 
-    const nuevoTotalInteres = nuevoTotalPagos - parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+    nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
+
+    const nuevoTotalInteres = nuevoTotalPagos - montoUsuario;
     const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
 
-    //// calcular meses salvados
+    const plazoSinAbono = montoUsuario / parseInt(calculoCuotaMensual);
+    const plazoConAbono = montoUsuario / parseInt(nuevoCoutaMensual);
 
-    const montdiv = monto.replace(/./g, '')/nuevoCoutaMensual;
-    const mesesSalvado = montdiv -plazoMeses;
+    const mesesSalvado = plazoSinAbono - plazoConAbono;
 
-    if (seguro === '' && abono === '') {
+    if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
       setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTiempoSalvado(mesesSalvado.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+      setTiempoSalvado(mesesSalvado.toFixed(0));
       setMostrarResultados(true);
-    }
-
-    if (seguro !== '' || abono !== '') {
-      setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTiempoSalvado(mesesSalvado.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setMostrarResultados(true);
+      setMostrarAbono(true);
     } else {
       setCuotaMensual(calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalPago(calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
       setMostrarResultados(true);
+      setMostrarAbono(false);
+    }
+    if (parseFloat(monto) > 0 && parseFloat(interes) > 0 && parseFloat(plazo) > 0) {
+      setMostrarResultados(true);
+    } else {
+      setMostrarResultados(false)
     }
   }
 
   const borrar = () => {
-      setMonto("");
-      setInteres("");
-      setPlazo("");
-      setUnidad("");
-      setSeguro("");
-      setAbono("");
-      setCuotaMensual("");
-      setTotalPago("");
-      setTotalInteres("");
-      setInteresSalvado("");
-      setTiempoSalvado("");
-      setMostrarResultados(false);
-    };
+    setMonto("");
+    setInteres("");
+    setPlazo("");
+    setUnidad("");
+    setAbono("");
+    setCuotaMensual("");
+    setTotalPago("");
+    setTotalInteres("");
+    setInteresSalvado("");
+    setTiempoSalvado("");
+    setMostrarResultados(false);
+    setMostrarAbono(false)
+  };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <View style= {styles.container}>
+      <View style={styles.container}>
         <Text style={styles.title}>Calculadora de Crédito</Text>
         <Text style={styles.subHeader}>Monto:</Text>
         <TextInput
@@ -154,38 +145,28 @@ const Calculadora = () => {
           keyboardType="numeric"
           maxLength={5}
         />
-
         <Text style={styles.subHeader}>Plazo:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese el plazo"
-          onChangeText={(text) => formatPlazoValue(text, setPlazo)}
-          value={plazo}
-          keyboardType="numeric"
-          maxLength={3}
-        />
-        <View
-          style={styles.picker}>
-
-          <Picker
-            selectedValue={unidad}
-            onValueChange={(val) => setUnidad(val)}>
-            <Picker.Item label='Meses' value='Meses' style={styles.pickerText} />
-            <Picker.Item label='Años' value='Años' style={styles.pickerText} />
-          </Picker>
+        <View style={styles.rowContainer}>
+          <TextInput
+            style={styles.inputTime}
+            placeholder=""
+            onChangeText={(text) => formatPlazoValue(text, setPlazo)}
+            value={plazo}
+            keyboardType="numeric"
+            maxLength={3}
+          />
+          <View
+            style={styles.picker}>
+            <Picker
+              selectedValue={unidad}
+              onValueChange={(val) => setUnidad(val)}>
+              <Picker.Item label='Meses' value='Meses' style={styles.pickerText} />
+              <Picker.Item label='Años' value='Años' style={styles.pickerText} />
+            </Picker>
+          </View>
         </View>
 
-        <Text style={styles.subHeader}>Seguros (opcional):</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese Seguro "
-          onChangeText={(text) => formatInputValue(text, setSeguro)}
-          value ={seguro}
-          keyboardType="numeric"
-          maxLength={21}
-        />
-
-        <Text style={styles.subHeader}>Abono a capital mensual(opcional):</Text>
+        <Text style={styles.subHeader}>Abono a capital mensual (opcional):</Text>
         <TextInput
           style={styles.input}
           placeholder="Ingrese pago extra "
@@ -195,7 +176,7 @@ const Calculadora = () => {
           maxLength={21}
         />
 
-        <View style= {styles.viewButtons}>
+        <View style={styles.viewButtons}>
           <TouchableOpacity
             style={[styles.button, styles.buttonLimpiar]}
             onPress={borrar}
@@ -211,7 +192,7 @@ const Calculadora = () => {
 
         {
           mostrarResultados && (
-            <View>
+            <View >
               <Text style={styles.textoResults} className={'CuotaMensual'}>
                 Cuota mensual: <Text style={styles.results}>{'$' + cuotaMensual}</Text>
               </Text>
@@ -223,7 +204,12 @@ const Calculadora = () => {
               <Text style={styles.textoResults}>
                 Total del interés pagado: <Text style={styles.results}>{'$' + totalInteres}</Text>
               </Text>
-
+            </View>
+          )
+        }
+        {
+          mostrarAbono && (
+            <View>
               <Text style={styles.subHeader}>Con abono Capital:</Text>
               <Text style={styles.textoResults}>
                 Te ahorras en interés: <Text style={styles.results}>{'$' + interesSalvado}</Text>

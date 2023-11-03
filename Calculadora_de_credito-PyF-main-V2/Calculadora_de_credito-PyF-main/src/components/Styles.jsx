@@ -27,6 +27,18 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 10,
     },
+    inputTime: {
+        height: 40,
+        width: 60,
+        margin: 5,
+        borderWidth: 1,
+        padding: 10,
+        backgroundColor: "white",
+        borderRadius: 10,
+    },
+    rowContainer: {
+        flexDirection: 'row'
+    },
     picker: {
         backgroundColor: "white",
         height: 40,
@@ -34,14 +46,6 @@ const styles = StyleSheet.create({
         margin: 5,
         borderRadius: 10,
         overflow: "hidden",
-        marginTop: 10,
-    },
-    pickerText: {
-        textAlignVertical: "center"
-    },
-    viewButtons: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
     },
     viewButtons: {
         flexDirection: "row",
@@ -69,7 +73,7 @@ const styles = StyleSheet.create({
         color: "#BD75C2",
         fontSize: 20,
         marginLeft: 5,
-        marginTop: 35,
+        marginTop: 25,
     },
     textoResults: {
         color: "white",
@@ -79,7 +83,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
     },
 
-    /* Componentes Menu */
     menuTitleText: {
         fontSize: 34,
         width: "78%",
@@ -91,13 +94,16 @@ const styles = StyleSheet.create({
         backgroundColor: "#BD75C2",
         flex: 1,
         alignItems: "center",
-        justifyContent: "space-evenly",
+        justifyContent: "flex-start", 
+        paddingTop: 100, 
     },
 
-    /* Componentes BotonMenu */
+
     buttonMenu: {
-        borderRadius: 20,
+        borderRadius: 40,
         overflow: "hidden",
+        marginBottom: -50, 
+        marginTop: 90, 
     },
     buttonMenuView: {
         backgroundColor: "#040404",
@@ -105,18 +111,21 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        padding: 15,
+        padding: 25,
+
     },
     buttonMenuText: {
         color: "white",
         fontSize: 25,
-        textAlign: "center",
         flex: 1,
+        fontWeight: "bold",
+        textAlign: "center",
     },
     imgButtonMenu: {
-        height: 64,
-        width: 64,
-    },
+        height: 54,
+        width: 54,
+    }
+
 });
 
 export default styles;
