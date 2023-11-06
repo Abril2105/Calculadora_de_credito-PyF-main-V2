@@ -4,6 +4,11 @@ import Constants from "expo-constants";
 const styles = StyleSheet.create({
     container: {
         backgroundColor: "#1c1c1c",
+        flexGrow: 1,
+        minHeight: "100%"
+    },
+    viewContainer: {
+        minHeight: "100%",
         flex: 1,
     },
     title: {
@@ -124,7 +129,26 @@ const styles = StyleSheet.create({
     imgButtonMenu: {
         height: 54,
         width: 54,
-    }
+    },
+
+    textTable: {
+        color: "black",
+        fontSize:16,
+    },
+
+
+    /* Referentes a la pantalla de carga */
+    logo: {
+        margin: "auto",
+        maxHeight: "50vh",
+        maxWidth: "50vw",
+    },
+    containerLogo: {
+        backgroundColor: "#BD75C2",
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
 
 });
 
