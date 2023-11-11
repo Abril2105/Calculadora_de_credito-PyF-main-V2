@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, ScrollView,FlatList,Button } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import styles from "./Styles";
 
@@ -16,6 +16,10 @@ const Calculadora = () => {
   const [tiempoSalvado, setTiempoSalvado] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [mostrarAbono, setMostrarAbono] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const[tiempoPago, setTiempoPago] = useState([]);
+  
+
 
   const formatInputValue = (text, stateSetter) => {
     if (typeof text !== "undefined") {
@@ -108,6 +112,52 @@ const Calculadora = () => {
     }
   }
 
+
+  
+  //Lógica de la tabla de amortizaciones
+
+ 
+  const calcularTiempoPago = () => {
+      const tablaPagos = [];
+      const tablaMontoTotal = parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+      const tablaInteres = interes;
+      const tablaTiempo = unidad;
+      const tablaAbonoExtra =  abono;
+
+      let pagoRestante = tablaMontoTotal;
+      for (let i=1; i <= tablaTiempo; i++){
+        const pagoIntereses = pagoRestante * (tablaInteres/100);
+        const pagoTotal = (tablaMontoTotal / tablaTiempo) + pagoIntereses + tablaAbonoExtra;
+        const pagoPrincipal = pagoTotal - pagoIntereses;
+
+        pagoRestante -= pagoPrincipal;
+
+        const pago = {
+          mes: i,
+          principal: pagoPrincipal,
+          interes: pagoIntereses,
+          total: pagoTotal,
+          saldo: pagoRestante
+        };
+
+        tablaPagos.push(pago);
+      }
+
+      setTiempoPago(tablaPagos);
+    
+  };
+
+  const handleClick = () => {
+    setShowPopup(true);
+    calcularTiempoPago();
+  };
+  
+
+      
+  
+      
+
+ 
   const borrar = () => {
     setMonto("");
     setInteres("");
@@ -125,6 +175,8 @@ const Calculadora = () => {
 
   return (
     <View style={styles.container}>
+
+      
       <ScrollView showsVerticalScrollIndicator={false} style={styles.viewContainer}>
         <Text style={styles.title}>Calculadora de Crédito</Text>
         <Text style={styles.subHeader}>Monto:</Text>
@@ -188,6 +240,12 @@ const Calculadora = () => {
             onPress={Calculo}>
             <Text style={styles.buttonText}>Calcular</Text>
           </TouchableOpacity>
+
+        
+          <TouchableOpacity onPress={handleClick} style={styles.button}>
+          <Text style={styles.buttonText}>Tabla de Pagos</Text>
+        </TouchableOpacity>
+
         </View>
 
         {
@@ -220,7 +278,49 @@ const Calculadora = () => {
             </View>
           )
         } 
-      </ScrollView>
+
+    
+     </ScrollView>
+
+     <FlatList
+        data = {tiempoPago}
+        keyExtractor={(item) => item.mes.toString()}
+        renderItem={({item}) => (
+          <View>
+            <Text>Mes: {item.mes} </Text>
+            <Text>Principal: {item.principal} </Text>
+            <Text>Interes: {item.interes} </Text>
+            <Text>Pago Total: {item.total} </Text>
+            <Text>Saldo: {item.saldo} </Text>
+          </View>
+
+        )}
+      />                  
+
+        <TouchableOpacity onPress={handleClick} style={styles.button}>
+          <Text style={styles.buttonText}>Tabla de Pagos</Text>
+        </TouchableOpacity>
+
+  
+      {showPopup && (
+        <View style={styles.popup}>
+          <Text style={styles.popupText}>Orden de Pagos: </Text>
+          {tiempoPago.map((pago) => (
+            <View key={pago.mes}>
+              <Text>Mes: {pago.mes} </Text>
+              <Text>Principal: {pago.principal} </Text>
+              <Text>Interes: {pago.interes} </Text>
+              <Text>Pago Total:{pago.total} </Text>
+              <Text>Saldo: {pago.saldo}</Text> 
+            </View>
+
+          ))}
+
+          <TouchableOpacity onPress={() => setShowPopup(false)}>
+            <Text style={styles.closeButton}>Close</Text>
+          </TouchableOpacity>
+        </View>
+    )}
     </View>
   )
 }
