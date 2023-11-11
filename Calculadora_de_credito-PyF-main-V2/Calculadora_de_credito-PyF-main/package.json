@@ -26,6 +26,7 @@
     "expo-dev-client": "~2.4.11",
     "react-native-web": "~0.19.6",
     "@expo/webpack-config": "^19.0.0"
+
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
