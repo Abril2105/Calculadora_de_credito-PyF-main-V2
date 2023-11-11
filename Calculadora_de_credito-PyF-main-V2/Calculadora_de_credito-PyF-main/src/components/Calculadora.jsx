@@ -39,7 +39,7 @@ const Calculadora = () => {
       // Reunir la parte entera y la parte decimal en el resultado final
       const result = decimalPart ? formattedIntegerPart + ',' + decimalPart : formattedIntegerPart;
 
-      stateSetter(text);
+      stateSetter(result);
     }
   };
 
