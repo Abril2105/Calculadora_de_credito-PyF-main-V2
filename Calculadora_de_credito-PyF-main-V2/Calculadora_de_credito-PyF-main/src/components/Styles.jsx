@@ -150,6 +150,58 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
 
+    /* Tabla amortización */
+    tablaContainer: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        elevation: 2, // Para sombra en Android
+        shadowColor: '#000', // Para sombra en iOS
+        shadowOffset: { width: 0, height: 2 }, // Para sombra en iOS
+        shadowOpacity: 0.3, // Para sombra en iOS
+    },
+
+    tablaHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+
+    headerText: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+
+    filaTabla: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+    },
+
+    closeButton: {
+        backgroundColor: "#aa5050",
+        borderRadius: 5,
+        alignContent: "center",
+        alignItems: "center",
+        width: 90,
+        height: 50,
+        marginVertical: 20,
+        marginHorizontal: "auto",
+    },
+
+    closeButtonText: {
+        textAlign: "center",
+        lineHeight: 50,
+        fontSize: 18,
+        color: "white",
+        fontWeight: "900"
+    },
+
+    closeContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+    },
 });
 
 export default styles;

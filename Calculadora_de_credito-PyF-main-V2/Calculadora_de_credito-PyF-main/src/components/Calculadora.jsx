@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, FlatList } from "react-native";
-import { Picker } from '@react-native-picker/picker';
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import styles from "./Styles";
 import { Button } from "react-native-web";
 
@@ -17,28 +24,36 @@ const Calculadora = () => {
   const [tiempoSalvado, setTiempoSalvado] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [mostrarAbono, setMostrarAbono] = useState(false);
-  
+  const [showPopup, setShowPopup] = useState(false);
 
   const formatInputValue = (text, stateSetter) => {
     if (typeof text !== "undefined") {
       // Eliminar caracteres no numéricos, excepto comas y puntos
-      const cleanedText = text.replace(/[^\d.,]/g, '');
+      const cleanedText = text.replace(/[^\d.,]/g, "");
 
       // Reemplazar comas múltiples por una sola coma
-      const formattedText = cleanedText.replace(/,+/g, ',');
+      const formattedText = cleanedText.replace(/,+/g, ",");
 
       // Reemplazar puntos por espacios en blanco y eliminar espacios en blanco
-      const normalizedText = formattedText.replace(/\./g, '').replace(/\s/g, '');
+      const normalizedText = formattedText
+        .replace(/\./g, "")
+        .replace(/\s/g, "");
 
       // Dividir el número en parte entera y parte decimal
-      const [integerPart, decimalPart] = normalizedText.split(',');
+      const [integerPart, decimalPart] = normalizedText.split(",");
 
       // Formatear la parte entera con puntos para los miles
-      const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      const formattedIntegerPart = integerPart.replace(
+        /\B(?=(\d{3})+(?!\d))/g,
+        "."
+      );
 
       // Reunir la parte entera y la parte decimal en el resultado final
-      const result = decimalPart ? formattedIntegerPart + ',' + decimalPart : formattedIntegerPart;
+      const result = decimalPart
+        ? formattedIntegerPart + "," + decimalPart
+        : formattedIntegerPart;
 
+      stateSetter(result);
       stateSetter(result);
     }
   };
@@ -46,34 +61,39 @@ const Calculadora = () => {
   const formatPlazoValue = (text, stateSetter) => {
     if (typeof text !== "undefined") {
       // Eliminar caracteres no numéricos
-      const cleanedText = text.replace(/[^0-9]/g, '');
+      const cleanedText = text.replace(/[^0-9]/g, "");
       stateSetter(cleanedText);
     }
   };
 
-  const Calculo = () => {
+  const Calculo = async () => {
     let plazoMeses;
 
-    if (unidad === 'Años') {
+    setShowPopup(true);
+
+    if (unidad === "Años") {
       plazoMeses = plazo * 12;
     } else {
       plazoMeses = plazo;
     }
-    let montoUsuario = parseFloat(monto.replace(/\./g, '').replace(',', '.'))
+    let montoUsuario = parseFloat(monto.replace(/\./g, "").replace(",", "."));
     const intrestest = parseFloat(interes) / 12;
     const interesMensual = intrestest / 100;
     const calcmontointres = montoUsuario * interesMensual;
-    const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
-    const calculoCuotaMensual = parseFloat(calcmontointres) / parseFloat(calcintersplazo);
+    const calcintersplazo = 1 - Math.pow(1 + interesMensual, -plazoMeses);
+    const calculoCuotaMensual =
+      parseFloat(calcmontointres) / parseFloat(calcintersplazo);
     const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);
     const calculoTotalInteres = calculoTotalPago - montoUsuario;
-    let temp1 = parseFloat(abono.replace(/\./g, ''));
+    let temp1 = parseFloat(abono.replace(/\./g, ""));
     let temp2 = parseFloat(calculoCuotaMensual);
     const nuevoCoutaMensual = temp1 + temp2;
 
-    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - calcmontointres));
+    const top =
+      Math.log(nuevoCoutaMensual) -
+      Math.log(nuevoCoutaMensual - calcmontointres);
 
-    const bottom = (Math.log(1 + interesMensual));
+    const bottom = Math.log(1 + interesMensual);
     const nuevoPagos = top / bottom;
 
     let nuevoTotalPagos;
@@ -89,64 +109,92 @@ const Calculadora = () => {
     const mesesSalvado = plazoSinAbono - plazoConAbono;
 
     if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
-      setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+      setCuotaMensual(
+        nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+      setTotalPago(
+        nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+      setTotalInteres(
+        nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+      setInteresSalvado(
+        interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
       setTiempoSalvado(mesesSalvado.toFixed(0));
       setMostrarResultados(true);
       setMostrarAbono(true);
     } else {
-      setCuotaMensual(calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+      setCuotaMensual(
+        calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+      setTotalPago(
+        calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+      setTotalInteres(
+        calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
       setMostrarResultados(true);
       setMostrarAbono(false);
     }
-    if (parseFloat(monto) > 0 && parseFloat(interes) > 0 && parseFloat(plazo) > 0) {
+    if (
+      parseFloat(monto) > 0 &&
+      parseFloat(interes) > 0 &&
+      parseFloat(plazo) > 0
+    ) {
       setMostrarResultados(true);
     } else {
-      setMostrarResultados(false)
+      setMostrarResultados(false);
     }
-  }
+
+    await calcularTiempoPago(); // Espera a que calcularTiempoPago termine
+
+    setShowPopup(true); // Ahora muestra el popup después de calcularTiempoPago
+  };
 
   //Lógica de la tabla de amortizaciones
 
-  const[tiempoPago, setTiempoPago] = useState([]);
+  const [tiempoPago, setTiempoPago] = useState([]);
 
   const calcularTiempoPago = () => {
-      const tablaPagos = [];
-      const tablaMontoTotal = montoUsuario;
-      const tablaInteres = interes;
-      const tablaTiempo = unidad;
-      const tablaAbonoExtra =  abono;
+    const tablaPagos = [];
+    const tablaMontoTotal = parseFloat(
+      monto.replace(/\./g, "").replace(",", ".")
+    );
+    const tablaInteres = parseFloat(interes);
+    const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
+    const tablaAbonoExtra = parseFloat(abono.replace(/\./g, ""));
 
-      let pagoRestante = tablaMontoTotal;
-      for (let i=1; i <= tablaTiempo; i++){
-        const pagoIntereses = pagoRestante * (tablaInteres/100);
-        const pagoTotal = (tablaMontoTotal / tablaTiempo) + pagoIntereses + tablaAbonoExtra;
-        const pagoPrincipal = pagoTotal - pagoIntereses;
+    let pagoRestante = tablaMontoTotal;
 
-        pagoRestante -= pagoPrincipal;
+    for (let i = 1; i <= tablaTiempo; i++) {
+      const pagoIntereses = pagoRestante * (tablaInteres / 100);
+      const pagoTotal =
+        tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
+      const pagoPrincipal = pagoTotal - pagoIntereses;
 
-        const pago = {
-          mes: i,
-          principal: pagoPrincipal,
-          interes: pagoIntereses,
-          total: pagoTotal,
-          saldo: pagoRestante 
-        };
+      pagoRestante -= pagoPrincipal;
 
-        pagos.push(pago);
-      }
+      const pago = {
+        mes: i,
+        principal: pagoPrincipal
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+      };
 
-      setTiempoPago(pagos);
+      tablaPagos.push(pago);
+    }
+
+    setTiempoPago(tablaPagos);
   };
 
   <FlatList
-    data = {tiempoPago}
+    data={tiempoPago}
     keyExtractor={(item) => item.mes.toString()}
-    renderItem={({item}) => (
+    renderItem={({ item }) => (
       <View>
         <Text>Mes: {item.mes} </Text>
         <Text>Principal: {item.principal} </Text>
@@ -154,44 +202,15 @@ const Calculadora = () => {
         <Text>Pago Total: {item.total} </Text>
         <Text>Saldo: {item.saldo} </Text>
       </View>
-
     )}
-  />
+  />;
+  const handleClick = () => {
+    setShowPopup(true);
+  };
 
-      const [showPopup, setShowPopup] = useState(false);
-      const handleClick = () => {
-        setShowPopup(true);
-      }
+  <Button onPress={handleClick} title="Tabla de Pagos" />;
 
-      <Button onPress={handleClick} title="Tabla de Pagos"/>
-
-      return(
-        <View>
-          {showPopup && (
-            <View style={styles.popup}>
-              <Text style={styles.popupText}>Orden de Pagos: </Text>
-              {tiempoPago.map((pago) => (
-                <View key={pago.mes}>
-                  <Text>Mes: {pago.mes} </Text>
-                  <Text>Principal: {pago.principal} </Text>
-                  <Text>Interes: {pago.interes} </Text>
-                  <Text>Pago Total:{pago.total} </Text>
-                  <Text>Saldo: {pago.saldo}</Text> 
-                </View>
-
-              ))}
-
-              <TouchableOpacity onPress={() => setShowPopup(false)}>
-                <Text style={styles.closeButton}>Close</Text>
-              </TouchableOpacity>
-            </View>
-        )}
-
-        </View>
-      );
-
-//Fin de lógica de tabla de amortizaciones
-
+  //Fin de lógica de tabla de amortizaciones
 
   const borrar = () => {
     setMonto("");
@@ -205,12 +224,15 @@ const Calculadora = () => {
     setInteresSalvado("");
     setTiempoSalvado("");
     setMostrarResultados(false);
-    setMostrarAbono(false)
+    setMostrarAbono(false);
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.viewContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.viewContainer}
+      >
         <Text style={styles.title}>Calculadora de Crédito</Text>
         <Text style={styles.subHeader}>Monto:</Text>
         <TextInput
@@ -240,18 +262,28 @@ const Calculadora = () => {
             keyboardType="numeric"
             maxLength={3}
           />
-          <View
-            style={styles.picker}>
+          <View style={styles.picker}>
             <Picker
               selectedValue={unidad}
-              onValueChange={(val) => setUnidad(val)}>
-              <Picker.Item label='Meses' value='Meses' style={styles.pickerText} />
-              <Picker.Item label='Años' value='Años' style={styles.pickerText} />
+              onValueChange={(val) => setUnidad(val)}
+            >
+              <Picker.Item
+                label="Meses"
+                value="Meses"
+                style={styles.pickerText}
+              />
+              <Picker.Item
+                label="Años"
+                value="Años"
+                style={styles.pickerText}
+              />
             </Picker>
           </View>
         </View>
 
-        <Text style={styles.subHeader}>Abono a |apital mensual (opcional):</Text>
+        <Text style={styles.subHeader}>
+          Abono a capital mensual (opcional):
+        </Text>
         <TextInput
           style={styles.input}
           placeholder="Ingrese pago extra "
@@ -268,46 +300,78 @@ const Calculadora = () => {
           >
             <Text style={styles.buttonText}>Borrar</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button]}
-            onPress={Calculo}>
+          <TouchableOpacity style={[styles.button]} onPress={Calculo}>
             <Text style={styles.buttonText}>Calcular</Text>
           </TouchableOpacity>
         </View>
 
-        {
-          mostrarResultados && (
-            <View >
-              <Text style={styles.textoResults} className={'CuotaMensual'}>
-                Cuota mensual: <Text style={styles.results}>{'$' + cuotaMensual}</Text>
-              </Text>
+        {mostrarResultados && (
+          <View>
+            <Text style={styles.textoResults} className={"CuotaMensual"}>
+              Cuota mensual:{" "}
+              <Text style={styles.results}>{"$" + cuotaMensual}</Text>
+            </Text>
 
-              <Text style={styles.textoResults}>
-                Total del crédito: <Text style={styles.results}>{'$' + totalPago}</Text>
-              </Text>
+            <Text style={styles.textoResults}>
+              Total del crédito:{" "}
+              <Text style={styles.results}>{"$" + totalPago}</Text>
+            </Text>
 
-              <Text style={styles.textoResults}>
-                Total del interés pagado: <Text style={styles.results}>{'$' + totalInteres}</Text>
-              </Text>
+            <Text style={styles.textoResults}>
+              Total del interés pagado:{" "}
+              <Text style={styles.results}>{"$" + totalInteres}</Text>
+            </Text>
+          </View>
+        )}
+        {mostrarAbono && (
+          <View>
+            <Text style={styles.subHeader}>Con abono Capital:</Text>
+            <Text style={styles.textoResults}>
+              Te ahorras en interés:{" "}
+              <Text style={styles.results}>{"$" + interesSalvado}</Text>
+            </Text>
+            <Text style={styles.textoResults}>
+              Te ahorra en tiempo:{" "}
+              <Text style={styles.results}>{tiempoSalvado} meses</Text>
+            </Text>
+          </View>
+        )}
+
+        <View>
+          {showPopup && (
+            <View style={styles.popup}>
+              <View style={styles.tablaContainer}>
+                <View style={styles.tablaHeader}>
+                  <Text style={styles.headerText}>Mes</Text>
+                  <Text style={styles.headerText}>Principal</Text>
+                  <Text style={styles.headerText}>Interes</Text>
+                  <Text style={styles.headerText}>Total</Text>
+                  <Text style={styles.headerText}>Saldo</Text>
+                </View>
+                {tiempoPago.map((pago) => (
+                  <View key={pago.mes} style={styles.filaTabla}>
+                    <Text>{pago.mes}</Text>
+                    <Text>{pago.principal}</Text>
+                    <Text>{pago.interes}</Text>
+                    <Text>{pago.total}</Text>
+                    <Text>{pago.saldo}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={styles.closeContainer}> 
+              <TouchableOpacity
+                onPress={() => setShowPopup(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+              </View>
             </View>
-          )
-        }
-        {
-          mostrarAbono && (
-            <View>
-              <Text style={styles.subHeader}>Con abono Capital:</Text>
-              <Text style={styles.textoResults}>
-                Te ahorras en interés: <Text style={styles.results}>{'$' + interesSalvado}</Text>
-              </Text>
-              <Text style={styles.textoResults}>
-                Te ahorra en tiempo: <Text style={styles.results}>{tiempoSalvado}</Text>
-              </Text>
-            </View>
-          )
-        } 
+          )}
+        </View>
       </ScrollView>
     </View>
-  )
-}
+  );
+};
 
 export default Calculadora;
