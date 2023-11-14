@@ -53,64 +53,79 @@ const Calculadora = () => {
     }
   };
 
-  const Calculo = () => {
-    let plazoMeses;
+ 
+    const Calculo = () => {
+      let plazoMeses;
+    
+      if (unidad === 'Años') {
+        plazoMeses = plazo * 12;
+      } else {
+        plazoMeses = plazo;
+      }
+    
+      let montoUsuario = parseFloat(monto.replace(/\./g, '').replace(',', '.'))
+      const intrestest = parseFloat(interes) / 12;
+      const interesMensual = intrestest / 100;
+      const calcmontointres = montoUsuario * interesMensual;
+      const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
+      const calculoCuotaMensual = calcmontointres / calcintersplazo;
+      const calculoTotalPago = calculoCuotaMensual * plazoMeses;
+      const calculoTotalInteres = calculoTotalPago - montoUsuario;
+    
+      let temp1 = parseFloat(abono.replace(/\./g, ''));
+      let temp2 = parseFloat(calculoCuotaMensual);
+      const nuevoCoutaMensual = temp1 + temp2;
+    
+      const nuevoPagos = Math.log(nuevoCoutaMensual / (nuevoCoutaMensual - calcmontointres)) / Math.log(1 + interesMensual);
+      let nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
+    
+      const nuevoTotalInteres = nuevoTotalPagos - montoUsuario;
+      const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
+    
+      // calucular tiempo salvado
+    
+        const P0 = parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+        const r = parseFloat(interes) / 12 / 100;
+        const n = parseFloat(plazo) * (unidad === 'Años' ? 12 : 1);
+        const extra = parseFloat(abono.replace(/\./g, '').replace(',', '.'));
 
-    if (unidad === 'Años') {
-      plazoMeses = plazo * 12;
-    } else {
-      plazoMeses = plazo;
-    }
-    let montoUsuario = parseFloat(monto.replace(/\./g, '').replace(',', '.'))
-    const intrestest = parseFloat(interes) / 12;
-    const interesMensual = intrestest / 100;
-    const calcmontointres = montoUsuario * interesMensual;
-    const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
-    const calculoCuotaMensual = parseFloat(calcmontointres) / parseFloat(calcintersplazo);
-    const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);
-    const calculoTotalInteres = calculoTotalPago - montoUsuario;
-    let temp1 = parseFloat(abono.replace(/\./g, ''));
-    let temp2 = parseFloat(calculoCuotaMensual);
-    const nuevoCoutaMensual = temp1 + temp2;
+        const P = (P0 * r) / (1 - Math.pow(1 + r, -n));
 
-    const top = (Math.log(nuevoCoutaMensual) - Math.log(nuevoCoutaMensual - calcmontointres));
+       
+        let remainingBalance = P0;
+        let months = 0;
+    
+        while (remainingBalance > 0) {
+          remainingBalance -= P;
+          remainingBalance *= 1 + r;
+          remainingBalance -= extra;
+          months += 1;
+        }
 
-    const bottom = (Math.log(1 + interesMensual));
-    const nuevoPagos = top / bottom;
+        const mesesSalvado = n - months;
 
-    let nuevoTotalPagos;
-
-    nuevoTotalPagos = nuevoPagos * nuevoCoutaMensual;
-
-    const nuevoTotalInteres = nuevoTotalPagos - montoUsuario;
-    const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
-
-    const plazoSinAbono = montoUsuario / parseInt(calculoCuotaMensual);
-    const plazoConAbono = montoUsuario / parseInt(nuevoCoutaMensual);
-
-    const mesesSalvado = plazoSinAbono - plazoConAbono;
-
-    if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
-      setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTiempoSalvado(mesesSalvado.toFixed(0));
-      setMostrarResultados(true);
-      setMostrarAbono(true);
-    } else {
-      setCuotaMensual(calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalPago(calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-      setMostrarResultados(true);
-      setMostrarAbono(false);
-    }
-    if (parseFloat(monto) > 0 && parseFloat(interes) > 0 && parseFloat(plazo) > 0) {
-      setMostrarResultados(true);
-    } else {
-      setMostrarResultados(false)
-    }
-  }
+    
+      if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
+        setCuotaMensual(nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setTotalPago(nuevoTotalPagos.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setTotalInteres(nuevoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setInteresSalvado(interesSalvado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setTiempoSalvado(mesesSalvado.toFixed(0));
+        setMostrarResultados(true);
+        setMostrarAbono(true);
+      } else {
+        setCuotaMensual(calculoCuotaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setTotalPago(calculoTotalPago.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setTotalInteres(calculoTotalInteres.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        setMostrarResultados(true);
+        setMostrarAbono(false);
+      }
+      if (parseFloat(monto) > 0 && parseFloat(interes) > 0 && parseFloat(plazo) > 0) {
+        setMostrarResultados(true);
+      } else {
+        setMostrarResultados(false)
+      }
+    };
 
 
   
