@@ -103,10 +103,27 @@ const Calculadora = () => {
     const nuevoTotalInteres = nuevoTotalPagos - montoUsuario;
     const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
 
-    const plazoSinAbono = montoUsuario / parseInt(calculoCuotaMensual);
-    const plazoConAbono = montoUsuario / parseInt(nuevoCoutaMensual);
+   // calucular tiempo salvado
+    
+        const P0 = parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+        const r = parseFloat(interes) / 12 / 100;
+        const n = parseFloat(plazo) * (unidad === 'Años' ? 12 : 1);
+        const extra = parseFloat(abono.replace(/\./g, '').replace(',', '.'));
 
-    const mesesSalvado = plazoSinAbono - plazoConAbono;
+        const P = (P0 * r) / (1 - Math.pow(1 + r, -n));
+
+       
+        let remainingBalance = P0;
+        let months = 0;
+    
+        while (remainingBalance > 0) {
+          remainingBalance -= P;
+          remainingBalance *= 1 + r;
+          remainingBalance -= extra;
+          months += 1;
+        }
+
+        const mesesSalvado = n - months;
 
     if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
       setCuotaMensual(
@@ -375,3 +392,4 @@ const Calculadora = () => {
 };
 
 export default Calculadora;
+
