@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Menu from "../components/Menu";
 import Calculadora from "../components/Calculadora";
 import SplashScreen from "../components/SplashScreen";
+import Endeudamiento from "../components/Endeudamiento";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,8 @@ const MainStack = () => {
                 <Stack.Screen name="Menu" component={Menu} />
 
                 <Stack.Screen name="Calculadora" component={Calculadora} />
+
+                <Stack.Screen name="Endeudamiento" component={Endeudamiento} />
                 
             </Stack.Navigator>
         </NavigationContainer>
