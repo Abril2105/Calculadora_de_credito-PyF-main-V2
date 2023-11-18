@@ -20,7 +20,7 @@ const Menu = ({ navigation }) => {
         imagen={require("..\\images\\endeudamiento.png")}
         text="Calcula tu nivel de endeudamiento"
         onPress={() => {
-          navigation.navigate("Menu");
+          navigation.navigate("Endeudamiento");
         }}
       />
     </View>
