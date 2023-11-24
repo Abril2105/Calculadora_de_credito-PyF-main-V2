@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 20,
         marginLeft: 5,
-        marginTop: 35,
+        marginTop: 20,
     },
     input: {
         height: 40,
@@ -63,9 +63,11 @@ const styles = StyleSheet.create({
         width: "50%",
         height: 50,
         marginTop: 30,
+        minWidth: "45%"
     },
     buttonLimpiar: {
         backgroundColor: "#BD75C2",
+        minWidth: "45%"
     },
     buttonText: {
         textAlign: "center",
@@ -84,8 +86,9 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 20,
         marginLeft: 5,
-        marginTop: 35,
-        
+        marginTop: 12,
+        alignSelf: "flex-start",
+
     },
 
     menuTitleText: {
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignContent: "center",
         alignItems: "center",
-        width: 90,
+        width: "45%",
         height: 50,
         marginVertical: 20,
         marginHorizontal: "auto",
@@ -200,7 +203,28 @@ const styles = StyleSheet.create({
 
     closeContainer: {
         flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "space-evenly",
+    },
+
+    downloadButton: {
+        backgroundColor: "darkgreen",
+        borderRadius: 5,
+        alignContent: "center",
+        alignItems: "center",
+        width: "45%",
+        height: 50,
+        marginVertical: 20,
+        marginHorizontal: "auto",
+        display: "none"
+    },
+
+    downloadButtonText: {
+        textAlign: "center",
+        lineHeight: 50,
+        fontSize: 18,
+        color: "white",
+        fontWeight: "900",
+        
     },
 });
 
