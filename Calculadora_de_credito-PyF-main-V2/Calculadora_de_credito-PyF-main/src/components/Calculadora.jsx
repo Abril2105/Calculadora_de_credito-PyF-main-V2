@@ -159,67 +159,87 @@ const Calculadora = () => {
     setShowPopup(true); // Ahora muestra el popup después de calcularTiempoPago
   };
 
-  //Lógica de la tabla de amortizaciones
+ //Lógica de la tabla de amortizaciones
 
-  const [tiempoPago, setTiempoPago] = useState([]);
+ const [tiempoPago, setTiempoPago] = useState([]);
 
-  const calcularTiempoPago = () => {
-    const tablaPagos = [];
-    const tablaMontoTotal = parseFloat(monto.replace(/\./g, "").replace(",", "."));
-    const tablaInteres = parseFloat(interes);
-    const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
-    const tablaAbonoExtra = parseFloat(abono.replace(/\./g, "")) || 0; // If abono is empty, default to 0
-  
-    let pagoRestante = tablaMontoTotal;
-  
-    for (let i = 1; i <= tablaTiempo; i++) {
-      const pagoIntereses = pagoRestante * (tablaInteres / 100);
-      let pagoTotal, pagoPrincipal;
-  
-      if (tablaAbonoExtra > 0) {
+ const calcularTiempoPago = () => {
+  const tablaPagos = [];
+  const tablaMontoTotal = parseFloat(monto.replace(/\./g, "").replace(",", "."));
+  const tablaInteres = parseFloat(interes);
+  const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
+  const tablaAbonoExtra = parseFloat(abono.replace(/\./g, "")) || 0; // If abono is empty, default to 0
 
-        pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
-        pagoPrincipal = pagoTotal - pagoIntereses;
-      } else {
-        pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses;
-        pagoPrincipal = pagoTotal - pagoIntereses;
-      }
-  
-      pagoRestante -= pagoPrincipal;
-  
-      const pago = {
-        mes: i,
-        principal: pagoPrincipal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-        interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-        total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-        saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      };
-  
-      tablaPagos.push(pago);
+  let pagoRestante = tablaMontoTotal;
+
+  for (let i = 1; i <= tablaTiempo; i++) {
+    const pagoIntereses = pagoRestante * (tablaInteres / 100);
+    let pagoTotal, pagoPrincipal;
+
+    if (tablaAbonoExtra > 0) {
+      // If there's an abono, adjust payments
+      pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
+      pagoPrincipal = pagoTotal - pagoIntereses;
+    } else {
+      // If abono is empty, calculate without additional payment
+      pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses;
+      pagoPrincipal = pagoTotal - pagoIntereses;
     }
-  
-    setTiempoPago(tablaPagos);
-  };
-  <FlatList
-    data={tiempoPago}
-    keyExtractor={(item) => item.mes.toString()}
-    renderItem={({ item }) => (
-      <View>
-        <Text>Mes: {item.mes} </Text>
-        <Text>Principal: {item.principal} </Text>
-        <Text>Interes: {item.interes} </Text>
-        <Text>Pago Total: {item.total} </Text>
-        <Text>Saldo: {item.saldo} </Text>
-      </View>
-    )}
-  />;
-  const handleClick = () => {
-    setShowPopup(true);
-  };
 
-  <Button onPress={handleClick} title="Tabla de Pagos" />;
+    pagoRestante -= pagoPrincipal;
 
-  //Fin de lógica de tabla de amortizaciones
+    const pago = {
+      mes: i,
+      principal: pagoPrincipal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+      interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+      total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+      saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+    };
+
+    tablaPagos.push(pago);
+  }
+
+  setTiempoPago(tablaPagos);
+};
+
+ <FlatList
+   data={tiempoPago}
+   keyExtractor={(item) => item.mes.toString()}
+   renderItem={({ item }) => (
+     <View>
+       <Text>Mes: {item.mes} </Text>
+       <Text>Principal: {item.principal} </Text>
+       <Text>Interes: {item.interes} </Text>
+       <Text>Pago Total: {item.total} </Text>
+       <Text>Saldo: {item.saldo} </Text>
+     </View>
+   )}
+ />;
+ const handleClick = () => {
+   setShowPopup(true);
+ };
+
+ <Button onPress={handleClick} title="Tabla de Pagos" />;
+
+
+ // Función para descargar la tabla en formato CSV
+ const descargarCSV = async () => {
+   const path = `${FileSystem.documentDirectory}tabla_amortizacion.csv`;
+   let csvData = 'Mes,Principal,Interes,Total,Saldo\n';
+
+   tiempoPago.forEach((pago) => {
+     csvData += `${pago.mes},${pago.principal.replace(',', '')},${pago.interes.replace(',', '')},${pago.total.replace(',', '')},${pago.saldo.replace(',', '')}\n`;
+   });
+
+   try {
+     await FileSystem.writeAsStringAsync(path, csvData, { encoding: FileSystem.EncodingType.UTF8 });
+     alert('Tabla de amortización descargada correctamente.');
+   } catch (error) {
+     console.error('Error al escribir el archivo:', error.message || error);
+   }
+ };
+
+ //Fin de lógica de tabla de amortizaciones
 
   const borrar = () => {
     setMonto("");
