@@ -372,7 +372,7 @@ const Calculadora = () => {
               <View style={styles.tablaContainer}>
                 <View style={styles.tablaHeader}>
                   <Text style={styles.headerText}>Mes</Text>
-                  <Text style={styles.headerText}>Principal</Text>
+                  <Text style={styles.headerText}>Capital</Text>
                   <Text style={styles.headerText}>Interes</Text>
                   <Text style={styles.headerText}>Total</Text>
                   <Text style={styles.headerText}>Saldo</Text>
