@@ -412,6 +412,14 @@ const Calculadora = () => {
               >
                 <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                  onPress={descargarCSV}
+                  style={styles.downloadButton}
+                >
+                  <Text style={styles.downloadButtonText}>Descargar tabla</Text>
+                </TouchableOpacity>
+                
               </View>
             </View>
           )}
