@@ -9,53 +9,87 @@ import {
 import styles from "./Styles";
 
 export default function Endeudamiento() {
-  const [ingresos, setIngresos] = useState();
-  const [gastos, setGastos] = useState();
-  const [nivelEndeudamiento, setNivelEndeudamiento] = useState();
+  const [ingresos, setIngresos] = useState([]);
+  const [gastos, setGastos] = useState([]);
+  const [nivelEndeudamiento, setNivelEndeudamiento] = useState(0);
   const [mostrarNivelEndeudamiento, setMostrarNivelEndeudamiento] =
     useState(false);
 
-  const formatInputValue = (text, stateSetter) => {
-    if (typeof text !== "undefined") {
-      // Eliminar caracteres no numéricos, excepto comas y puntos
-      const cleanedText = text.replace(/[^\d.,]/g, "");
-
-      // Reemplazar comas múltiples por una sola coma
-      const formattedText = cleanedText.replace(/,+/g, ",");
-
-      // Reemplazar puntos por espacios en blanco y eliminar espacios en blanco
-      const normalizedText = formattedText
-        .replace(/\./g, "")
-        .replace(/\s/g, "");
-
-      // Dividir el número en parte entera y parte decimal
-      const [integerPart, decimalPart] = normalizedText.split(",");
-
-      // Formatear la parte entera con puntos para los miles
-      const formattedIntegerPart = integerPart.replace(
-        /\B(?=(\d{3})+(?!\d))/g,
-        "."
-      );
-
-      // Reunir la parte entera y la parte decimal en el resultado final
-      const result = decimalPart
-        ? formattedIntegerPart + "," + decimalPart
-        : formattedIntegerPart;
-
-      stateSetter(result);
-    }
+  const agregarIngresos = () => {
+    setIngresos([...ingresos, ""]);
   };
 
-  function calcularNivelEndeudamiento() {
-    let ingresosUsuario = parseFloat(
-      ingresos.replace(/\./g, "").replace(",", ".")
+  const agregarGastos = () => {
+    setGastos([...gastos, ""]);
+  };
+
+  const handleChangeIngresos = (text, index) => {
+    const updatedIngresos = [...ingresos];
+    updatedIngresos[index] = text;
+    setIngresos(updatedIngresos);
+  };
+
+  const handleChangeGastos = (text, index) => {
+    const updatedGastos = [...gastos];
+    updatedGastos[index] = text;
+    setGastos(updatedGastos);
+  };
+
+  const clearIngresos = () => {
+    setIngresos([]);
+  };
+  
+  const clearGastos = () => {
+    setGastos([]);
+  };
+
+  const deleteIngreso = (index) => {
+    const updatedIngresos = ingresos.filter((_, i) => i !== index);
+    setIngresos(updatedIngresos);
+  };
+
+  const deleteGasto = (index) => {
+    const updatedGastos = gastos.filter((_, i) => i !== index);
+    setGastos(updatedGastos);
+  };
+
+  const calcularNivelEndeudamiento = () => {
+    const totalIngresosUsuario = ingresos.reduce(
+      (total, ingreso) =>
+        total + (parseFloat(ingreso.replace(/\./g, "").replace(",", ".")) || 0),
+      0
     );
-    let gastosUsuario = parseFloat(gastos.replace(/\./g, "").replace(",", "."));
+    const totalGastosUsuario = gastos.reduce(
+      (total, gasto) =>
+        total + (parseFloat(gasto.replace(/\./g, "").replace(",", ".")) || 0),
+      0
+    );
 
-      setNivelEndeudamiento(((gastosUsuario / ingresosUsuario)*100).toFixed(2) + "")
+    setNivelEndeudamiento(
+      ((totalGastosUsuario / totalIngresosUsuario) * 100).toFixed(2)
+    );
+    setMostrarNivelEndeudamiento(true);
+  };
 
-    setMostrarNivelEndeudamiento(true)
-  }
+  const clearAll = () => {
+    setIngresos([]);
+    setGastos([]);
+    setNivelEndeudamiento(0);
+    setMostrarNivelEndeudamiento(false);
+  };
+
+  const formatInputValue = (text, stateSetter) => {
+
+      let processedText = text;
+    
+      
+        processedText = processedText.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      
+      stateSetter(processedText);
+    }
+
+      
+  
 
   return (
     <View style={styles.container}>
@@ -66,42 +100,75 @@ export default function Endeudamiento() {
         <Text style={styles.title}>Nivel de Endeudamiento</Text>
 
         <Text style={styles.subHeader}>Ingresos:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese sus ingresos"
-          onChangeText={(text) => formatInputValue(text, setIngresos)}
-          value={ingresos}
-          keyboardType="numeric"
-          maxLength={21}
-        />
-
-        <Text style={styles.subHeader}>Gastos Financieros:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese sus gastos"
-          onChangeText={(text) => formatInputValue(text, setGastos)}
-          value={gastos}
-          keyboardType="numeric"
-          maxLength={21}
-        />
+        {ingresos.map((ingreso, index) => (
+          <View key={`ingreso-${index}`}>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese sus ingresos"
+              onChangeText={(text) => formatInputValue(text, (formattedText) => handleChangeIngresos(formattedText, index))}
+              value={ingreso}
+              keyboardType="numeric"
+              maxLength={21}
+            />
+            <TouchableOpacity style={styles.button} onPress={() => deleteIngreso(index)}>
+              <Text style={styles.buttonText} >Delete</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
 
         <View style={styles.viewButtons}>
-          <TouchableOpacity
-            style={[styles.button]}
-            onPress={calcularNivelEndeudamiento}
-          >
-            <Text style={styles.buttonText}>Calcular</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={agregarIngresos}>
+          <Text style={styles.buttonText}>Agregar Ingreso</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={clearIngresos}>
+          <Text style={styles.buttonText}>Limpiar Ingresos</Text>
+        </TouchableOpacity>
         </View>
+        <Text style={styles.subHeader}>Gastos Financieros:</Text>
+        {gastos.map((gasto, index) => (
+          <View key={`gasto-${index}`}>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese sus gastos"
+              onChangeText={(text) => formatInputValue(text, (formattedText) => handleChangeGastos(formattedText, index))}
+              value={gasto}
+              keyboardType="numeric"
+              maxLength={21}
+            />
+            <TouchableOpacity style={styles.button} onPress={() => deleteGasto(index)}>
+              <Text style={styles.buttonText} >Delete</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+        <View style={styles.viewButtons}>
+        <TouchableOpacity style={styles.button} onPress={agregarGastos}>
+          <Text style={styles.buttonText}>Agregar Gasto</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={clearGastos}>
+          <Text style={styles.buttonText}>Limpiar Gastos</Text>
+        </TouchableOpacity>
+      </View>
+      
+        <TouchableOpacity
+          style={[styles.button]}
+          onPress={calcularNivelEndeudamiento}
+        >
+          <Text style={styles.buttonText}>Calcular</Text>
+        </TouchableOpacity>
 
-        {mostrarNivelEndeudamiento ? (
+        {mostrarNivelEndeudamiento && (
           <View>
             <Text style={styles.textoResults} className={"CuotaMensual"}>
               Nivel de endeudamiento:{" "}
-              <Text style={styles.results}>{nivelEndeudamiento + "%"}</Text>
+              <Text style={styles.results}>{nivelEndeudamiento}%</Text>
             </Text>
           </View>
-        ) : null}
+        )}
+
+        <TouchableOpacity style={styles.button} onPress={clearAll}>
+          <Text style={styles.buttonText}>Borrar</Text>
+        </TouchableOpacity>
+        
       </ScrollView>
     </View>
   );
