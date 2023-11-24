@@ -161,46 +161,64 @@ const Calculadora = () => {
 
  //Lógica de la tabla de amortizaciones
 
- const [tiempoPago, setTiempoPago] = useState([]);
+ 
 
  const calcularTiempoPago = () => {
-  const tablaPagos = [];
-  const tablaMontoTotal = parseFloat(monto.replace(/\./g, "").replace(",", "."));
-  const tablaInteres = parseFloat(interes);
-  const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
-  const tablaAbonoExtra = parseFloat(abono.replace(/\./g, "")) || 0; // If abono is empty, default to 0
+   const tablaPagos = [];
+   const tablaMontoTotal = parseFloat(
+     monto.replace(/\./g, "").replace(",", ".")
+   );
+   const tablaInteres = parseFloat(interes.replace(/\./g, "").replace(",", "."));
+   const tablaTiempo = unidad === "Años" ? ((plazo * 12) - tiempoSalvado) : (plazo - tiempoSalvado);
 
-  let pagoRestante = tablaMontoTotal;
+   let tablaAbonoExtra = 0;
 
-  for (let i = 1; i <= tablaTiempo; i++) {
-    const pagoIntereses = pagoRestante * (tablaInteres / 100);
-    let pagoTotal, pagoPrincipal;
+   if (abono !== "") {
+     tablaAbonoExtra = parseFloat(abono.replace(/\./g, "").replace(",", "."));
+   } else {
+     tablaAbonoExtra = 0;
+   }
 
-    if (tablaAbonoExtra > 0) {
-      // If there's an abono, adjust payments
-      pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
-      pagoPrincipal = pagoTotal - pagoIntereses;
-    } else {
-      // If abono is empty, calculate without additional payment
-      pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses;
-      pagoPrincipal = pagoTotal - pagoIntereses;
-    }
+   let pagoRestante = tablaMontoTotal;
 
-    pagoRestante -= pagoPrincipal;
+   for (let i = 1; i <= tablaTiempo; i++) {
+     const pagoIntereses = pagoRestante * ((tablaInteres/12) / 100);
+     let pagoTotal;
+     let pagoPrincipal;
 
-    const pago = {
-      mes: i,
-      principal: pagoPrincipal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-    };
+     if (i !== tablaTiempo) {
+       pagoTotal = parseFloat(cuotaMensual.replace(/\./g, "").replace(",", "."))/100;
+       
+       pagoPrincipal =  pagoTotal-pagoIntereses;
 
-    tablaPagos.push(pago);
-  }
+       pagoRestante -= pagoPrincipal;
+     } else {
+       pagoPrincipal =  pagoRestante;
 
-  setTiempoPago(tablaPagos);
-};
+       pagoTotal = pagoPrincipal+pagoIntereses;
+       pagoRestante = 0;
+     }
+     
+
+     const pago = {
+       mes: i,
+       principal: pagoPrincipal
+         .toFixed(2)
+         .replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+       interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+       total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+       saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+     };
+     
+     
+
+     tablaPagos.push(pago);
+     
+     
+   }
+
+   setTiempoPago(tablaPagos);
+ };
 
  <FlatList
    data={tiempoPago}
