@@ -11,6 +11,7 @@ import { Picker } from "@react-native-picker/picker";
 import styles from "./Styles";
 import { Button } from "react-native-web";
 
+
 const Calculadora = () => {
   const [monto, setMonto] = useState("");
   const [interes, setInteres] = useState("");
@@ -26,45 +27,34 @@ const Calculadora = () => {
   const [mostrarAbono, setMostrarAbono] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  const formatInputValue = (text, stateSetter) => {
+  const formatInputValue = (text, stateSetter, allowDecimal = true, isInterest = false) => {
+
     if (typeof text !== "undefined") {
-      // Eliminar caracteres no numéricos, excepto comas y puntos
-      const cleanedText = text.replace(/[^\d.,]/g, "");
-
-      // Reemplazar comas múltiples por una sola coma
-      const formattedText = cleanedText.replace(/,+/g, ",");
-
-      // Reemplazar puntos por espacios en blanco y eliminar espacios en blanco
-      const normalizedText = formattedText
-        .replace(/\./g, "")
-        .replace(/\s/g, "");
-
-      // Dividir el número en parte entera y parte decimal
-      const [integerPart, decimalPart] = normalizedText.split(",");
-
-      // Formatear la parte entera con puntos para los miles
-      const formattedIntegerPart = integerPart.replace(
-        /\B(?=(\d{3})+(?!\d))/g,
-        "."
-      );
-
-      // Reunir la parte entera y la parte decimal en el resultado final
-      const result = decimalPart
-        ? formattedIntegerPart + "," + decimalPart
-        : formattedIntegerPart;
-
-      stateSetter(result);
-      stateSetter(result);
+      let processedText = text;
+    
+      if (!isInterest) {
+        processedText = processedText.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      } else {
+        // Allow up to 2 decimal places for interest
+        const regexPattern = allowDecimal ? /^\d+(\.\d{0,2})?$/ : /^\d+$/;
+        const isValidInput = regexPattern.test(text);
+    
+        processedText = isValidInput ? text : stateSetter instanceof Function ? stateSetter(text) : text;
+    
+        // Replace commas and limit decimals to 2 places
+        processedText = processedText.replace(/,/g, '');
+    
+        const [integerPart, decimalPart] = processedText.split('.');
+        processedText = decimalPart ? `${integerPart}.${decimalPart.slice(0, 2)}` : processedText;
+      }
+    
+      stateSetter(processedText);
     }
+
+      
   };
 
-  const formatPlazoValue = (text, stateSetter) => {
-    if (typeof text !== "undefined") {
-      // Eliminar caracteres no numéricos
-      const cleanedText = text.replace(/[^0-9]/g, "");
-      stateSetter(cleanedText);
-    }
-  };
+  
 
   const Calculo = async () => {
     let plazoMeses;
@@ -105,26 +95,26 @@ const Calculadora = () => {
 
    // calucular tiempo salvado
     
-        const P0 = parseFloat(monto.replace(/\./g, '').replace(',', '.'));
-        const r = parseFloat(interes) / 12 / 100;
-        const n = parseFloat(plazo) * (unidad === 'Años' ? 12 : 1);
-        const extra = parseFloat(abono.replace(/\./g, '').replace(',', '.'));
-
-        const P = (P0 * r) / (1 - Math.pow(1 + r, -n));
-
-       
-        let remainingBalance = P0;
-        let months = 0;
-    
-        while (remainingBalance > 0) {
-          remainingBalance -= P;
-          remainingBalance *= 1 + r;
-          remainingBalance -= extra;
-          months += 1;
-        }
-
-        const mesesSalvado = n - months;
-
+   const P0 = parseFloat(monto.replace(/\./g, '').replace(',', '.'));
+   const r = parseFloat(interes) / 12 / 100;
+   const n = parseFloat(plazo) * (unidad === 'Años' ? 12 : 1);
+   const extra = parseFloat(abono.replace(/\./g, '').replace(',', '.'));
+   
+   const P = (P0 * r) / (1 - Math.pow(1 + r, -n));
+   
+   let remainingBalance = P0;
+   let months = 0;
+   
+   while (remainingBalance > 0 && months <= n) {
+     const interestPayment = remainingBalance * r;
+     const principalPayment = P - interestPayment + extra;
+     
+     remainingBalance -= principalPayment;
+   
+     months += 1;
+   }
+   
+   const mesesSalvado = n - months;
     if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
       setCuotaMensual(
         nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
@@ -175,39 +165,41 @@ const Calculadora = () => {
 
   const calcularTiempoPago = () => {
     const tablaPagos = [];
-    const tablaMontoTotal = parseFloat(
-      monto.replace(/\./g, "").replace(",", ".")
-    );
+    const tablaMontoTotal = parseFloat(monto.replace(/\./g, "").replace(",", "."));
     const tablaInteres = parseFloat(interes);
     const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
-    const tablaAbonoExtra = parseFloat(abono.replace(/\./g, ""));
-
+    const tablaAbonoExtra = parseFloat(abono.replace(/\./g, "")) || 0; // If abono is empty, default to 0
+  
     let pagoRestante = tablaMontoTotal;
-
+  
     for (let i = 1; i <= tablaTiempo; i++) {
       const pagoIntereses = pagoRestante * (tablaInteres / 100);
-      const pagoTotal =
-        tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
-      const pagoPrincipal = pagoTotal - pagoIntereses;
+      let pagoTotal, pagoPrincipal;
+  
+      if (tablaAbonoExtra > 0) {
 
+        pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses + tablaAbonoExtra;
+        pagoPrincipal = pagoTotal - pagoIntereses;
+      } else {
+        pagoTotal = tablaMontoTotal / tablaTiempo + pagoIntereses;
+        pagoPrincipal = pagoTotal - pagoIntereses;
+      }
+  
       pagoRestante -= pagoPrincipal;
-
+  
       const pago = {
         mes: i,
-        principal: pagoPrincipal
-          .toFixed(2)
-          .replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        principal: pagoPrincipal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
         interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
         total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
         saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
       };
-
+  
       tablaPagos.push(pago);
     }
-
+  
     setTiempoPago(tablaPagos);
   };
-
   <FlatList
     data={tiempoPago}
     keyExtractor={(item) => item.mes.toString()}
@@ -255,7 +247,7 @@ const Calculadora = () => {
         <TextInput
           style={styles.input}
           placeholder="Ingrese el monto"
-          onChangeText={(text) => formatInputValue(text, setMonto)}
+          onChangeText={(text) => formatInputValue(text, setMonto,false)}
           value={monto}
           keyboardType="numeric"
           maxLength={21}
@@ -264,7 +256,7 @@ const Calculadora = () => {
         <TextInput
           style={styles.input}
           placeholder="Ingrese el Interés Anual"
-          onChangeText={(text) => formatInputValue(text, setInteres)}
+          onChangeText={(text) => formatInputValue(text, setInteres, true, true)} 
           value={interes}
           keyboardType="numeric"
           maxLength={5}
@@ -274,7 +266,7 @@ const Calculadora = () => {
           <TextInput
             style={styles.inputTime}
             placeholder=""
-            onChangeText={(text) => formatPlazoValue(text, setPlazo)}
+            onChangeText={(text) => formatInputValue(text, setPlazo,false)}
             value={plazo}
             keyboardType="numeric"
             maxLength={3}
@@ -304,7 +296,7 @@ const Calculadora = () => {
         <TextInput
           style={styles.input}
           placeholder="Ingrese pago extra "
-          onChangeText={(text) => formatInputValue(text, setAbono)}
+          onChangeText={(text) => formatInputValue(text, setAbono,false)}
           value={abono}
           keyboardType="numeric"
           maxLength={21}

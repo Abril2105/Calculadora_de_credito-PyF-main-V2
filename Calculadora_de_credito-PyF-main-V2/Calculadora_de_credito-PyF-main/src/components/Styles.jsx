@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#4C97C7",
         borderRadius: 5,
         alignItems: "center",
-        width: 90,
+        width: "50%",
         height: 50,
         marginTop: 30,
     },
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginLeft: 5,
         marginTop: 35,
-        alignSelf: "center",
+        
     },
 
     menuTitleText: {
