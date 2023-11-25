@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, FlatList, Button } from "react-native";
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import * as FileSystem from 'expo-file-system';
 import styles from "./Styles";
+import { Button } from "react-native-web";
 
 
 const Calculadora = () => {
@@ -21,30 +28,29 @@ const Calculadora = () => {
   const [showPopup, setShowPopup] = useState(false);
 
   const formatInputValue = (text, stateSetter, allowDecimal = true, isInterest = false) => {
-
-    if (typeof text !== "undefined") {
+    if (text !== undefined && text !== null && text !== "") {
       let processedText = text;
-    
+  
       if (!isInterest) {
         processedText = processedText.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       } else {
         // Allow up to 2 decimal places for interest
         const regexPattern = allowDecimal ? /^\d+(\.\d{0,2})?$/ : /^\d+$/;
         const isValidInput = regexPattern.test(text);
-    
+  
         processedText = isValidInput ? text : stateSetter instanceof Function ? stateSetter(text) : text;
-    
+  
         // Replace commas and limit decimals to 2 places
         processedText = processedText.replace(/,/g, '');
-    
+  
         const [integerPart, decimalPart] = processedText.split('.');
         processedText = decimalPart ? `${integerPart}.${decimalPart.slice(0, 2)}` : processedText;
       }
-    
+  
       stateSetter(processedText);
+    } else {
+      stateSetter(""); // Set state to empty string if text is empty
     }
-
-      
   };
 
   
@@ -60,10 +66,10 @@ const Calculadora = () => {
       plazoMeses = plazo;
     }
     let montoUsuario = parseFloat(monto.replace(/\./g, "").replace(",", "."));
-    const intrestest = parseFloat(interes.replace(/\./g, '').replace(',', '.')) / 12;
+    const intrestest = parseFloat(interes) / 12;
     const interesMensual = intrestest / 100;
     const calcmontointres = montoUsuario * interesMensual;
-    const calcintersplazo = (1 - Math.pow(1 + interesMensual, -plazoMeses));
+    const calcintersplazo = 1 - Math.pow(1 + interesMensual, -plazoMeses);
     const calculoCuotaMensual =
       parseFloat(calcmontointres) / parseFloat(calcintersplazo);
     const calculoTotalPago = calculoCuotaMensual * parseFloat(plazoMeses);
@@ -85,7 +91,6 @@ const Calculadora = () => {
 
     const nuevoTotalInteres = nuevoTotalPagos - montoUsuario;
     const interesSalvado = calculoTotalInteres - nuevoTotalInteres;
-
 
    // calucular tiempo salvado
     
@@ -109,7 +114,6 @@ const Calculadora = () => {
    }
    
    const mesesSalvado = n - months;
-
     if (parseFloat(abono) > 0 && parseFloat(monto) > 0) {
       setCuotaMensual(
         nuevoCoutaMensual.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
@@ -154,15 +158,14 @@ const Calculadora = () => {
     setShowPopup(true); // Ahora muestra el popup después de calcularTiempoPago
   };
 
- //Lógica de la tabla de amortizaciones
+  const [tiempoPago, setTiempoPago] = useState([]);
 
-
-  const calcularTiempoPago = () => {
+  const calcularTiempoPago = async () => {
     const tablaPagos = [];
     const tablaMontoTotal = parseFloat(
       monto.replace(/\./g, "").replace(",", ".")
     );
-    const tablaInteres = parseFloat(interes.replace(/\./g, "").replace(",", "."));
+    const tablaInteres = parseFloat(interes);
     const tablaTiempo = unidad === "Años" ? ((plazo * 12) - tiempoSalvado) : (plazo - tiempoSalvado);
 
     let tablaAbonoExtra = 0;
@@ -173,14 +176,7 @@ const Calculadora = () => {
       tablaAbonoExtra = 0;
     }
 
-
- const calcularTiempoPago = () => {
-  const tablaPagos = [];
-  const tablaMontoTotal = parseFloat(monto.replace(/\./g, "").replace(",", "."));
-  const tablaInteres = parseFloat(interes);
-  const tablaTiempo = unidad === "Años" ? plazo * 12 : plazo;
-  const tablaAbonoExtra = parseFloat(abono.replace(/\./g, "")) || 0; // If abono is empty, default to 0
-
+    let pagoRestante = tablaMontoTotal;
 
     for (let i = 1; i <= tablaTiempo; i++) {
       const pagoIntereses = pagoRestante * ((tablaInteres/12) / 100);
@@ -210,42 +206,43 @@ const Calculadora = () => {
         total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
         saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
       };
-      
-      
-
       tablaPagos.push(pago);
-      
-      
-
     }
 
-    pagoRestante -= pagoPrincipal;
+    setTiempoPago(tablaPagos);
+  };
 
-    const pago = {
-      mes: i,
-      principal: pagoPrincipal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-      saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-    };
+  const handleClick = () => {
+    setShowPopup(true);
+  };
 
-    tablaPagos.push(pago);
-  }
+  <Button onPress={handleClick} title="Tabla de Pagos" />;
 
-  setTiempoPago(tablaPagos);
-};
-
-
+  const solicitarPermisos = async () => {
+    const { status } = await FileSystem.requestPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se requieren permisos para descargar el archivo.');
+      return false;
+    }
+    return true;
+  };
 
   // Función para descargar la tabla en formato CSV
   const descargarCSV = async () => {
+    const { status } = await MediaLibrary.getPermissionsAsync(writeOnly);
+  
+    if (status !== 'granted') {
+      console.error('Permission to write to external storage denied');
+      return;
+    }
+  
     const path = `${FileSystem.documentDirectory}tabla_amortizacion.csv`;
     let csvData = 'Mes,Principal,Interes,Total,Saldo\n';
-
+  
     tiempoPago.forEach((pago) => {
       csvData += `${pago.mes},${pago.principal.replace(',', '')},${pago.interes.replace(',', '')},${pago.total.replace(',', '')},${pago.saldo.replace(',', '')}\n`;
     });
-
+  
     try {
       await FileSystem.writeAsStringAsync(path, csvData, { encoding: FileSystem.EncodingType.UTF8 });
       alert('Tabla de amortización descargada correctamente.');
@@ -255,7 +252,6 @@ const Calculadora = () => {
   };
 
   //Fin de lógica de tabla de amortizaciones
-
 
   const borrar = () => {
     setMonto("");
@@ -271,6 +267,7 @@ const Calculadora = () => {
     setMostrarResultados(false);
     setMostrarAbono(false);
   };
+
 
   return (
     <View style={styles.container}>
@@ -288,7 +285,7 @@ const Calculadora = () => {
           keyboardType="numeric"
           maxLength={21}
         />
-        <Text style={styles.subHeader}>Interés anual E.A. (%):</Text>
+        <Text style={styles.subHeader}>Interés anual (%):</Text>
         <TextInput
           style={styles.input}
           placeholder="Ingrese el Interés Anual"
@@ -404,20 +401,20 @@ const Calculadora = () => {
                 ))}
               </View>
               <View style={styles.closeContainer}> 
-                <TouchableOpacity
-                  onPress={() => setShowPopup(false)}
-                  style={styles.closeButton}
-                >
-                  <Text style={styles.closeButtonText}>Cerrar tabla</Text>
-                </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowPopup(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
 
-                {/* Botón para descargar la tabla en formato CSV */}
-                <TouchableOpacity
+              <TouchableOpacity
                   onPress={descargarCSV}
                   style={styles.downloadButton}
                 >
                   <Text style={styles.downloadButtonText}>Descargar tabla</Text>
                 </TouchableOpacity>
+                
               </View>
             </View>
           )}

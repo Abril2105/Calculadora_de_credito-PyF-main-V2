@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#4C97C7",
         borderRadius: 5,
         alignItems: "center",
-        width: "50%",
+        width: 90,
         height: 50,
         marginTop: 30,
         minWidth: "45%"
@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         marginTop: 12,
         alignSelf: "flex-start",
-
     },
 
     menuTitleText: {
@@ -105,7 +104,6 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start", 
         paddingTop: 100, 
     },
-
 
     buttonMenu: {
         borderRadius: 40,
@@ -138,7 +136,6 @@ const styles = StyleSheet.create({
         color: "black",
         fontSize:16,
     },
-
 
     /* Referentes a la pantalla de carga */
     logo: {
@@ -215,7 +212,6 @@ const styles = StyleSheet.create({
         height: 50,
         marginVertical: 20,
         marginHorizontal: "auto",
-        display: "none"
     },
 
     downloadButtonText: {
@@ -229,3 +225,5 @@ const styles = StyleSheet.create({
 });
 
 export default styles;
+
+
