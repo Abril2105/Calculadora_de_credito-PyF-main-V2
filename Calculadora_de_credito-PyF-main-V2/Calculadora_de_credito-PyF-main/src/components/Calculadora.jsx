@@ -28,30 +28,29 @@ const Calculadora = () => {
   const [showPopup, setShowPopup] = useState(false);
 
   const formatInputValue = (text, stateSetter, allowDecimal = true, isInterest = false) => {
-
-    if (typeof text !== "undefined") {
+    if (text !== undefined && text !== null && text !== "") {
       let processedText = text;
-    
+  
       if (!isInterest) {
         processedText = processedText.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       } else {
         // Allow up to 2 decimal places for interest
         const regexPattern = allowDecimal ? /^\d+(\.\d{0,2})?$/ : /^\d+$/;
         const isValidInput = regexPattern.test(text);
-    
+  
         processedText = isValidInput ? text : stateSetter instanceof Function ? stateSetter(text) : text;
-    
+  
         // Replace commas and limit decimals to 2 places
         processedText = processedText.replace(/,/g, '');
-    
+  
         const [integerPart, decimalPart] = processedText.split('.');
         processedText = decimalPart ? `${integerPart}.${decimalPart.slice(0, 2)}` : processedText;
       }
-    
+  
       stateSetter(processedText);
+    } else {
+      stateSetter(""); // Set state to empty string if text is empty
     }
-
-      
   };
 
   
