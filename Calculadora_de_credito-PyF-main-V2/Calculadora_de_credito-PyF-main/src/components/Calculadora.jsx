@@ -159,105 +159,100 @@ const Calculadora = () => {
     setShowPopup(true); // Ahora muestra el popup después de calcularTiempoPago
   };
 
- //Lógica de la tabla de amortizaciones
+  const [tiempoPago, setTiempoPago] = useState([]);
 
- 
+  const calcularTiempoPago = () => {
+    const tablaPagos = [];
+    const tablaMontoTotal = parseFloat(
+      monto.replace(/\./g, "").replace(",", ".")
+    );
+    const tablaInteres = parseFloat(interes);
+    const tablaTiempo = unidad === "Años" ? ((plazo * 12) - tiempoSalvado) : (plazo - tiempoSalvado);
 
- const calcularTiempoPago = () => {
-   const tablaPagos = [];
-   const tablaMontoTotal = parseFloat(
-     monto.replace(/\./g, "").replace(",", ".")
-   );
-   const tablaInteres = parseFloat(interes.replace(/\./g, "").replace(",", "."));
-   const tablaTiempo = unidad === "Años" ? ((plazo * 12) - tiempoSalvado) : (plazo - tiempoSalvado);
+    let tablaAbonoExtra = 0;
 
-   let tablaAbonoExtra = 0;
+    if (abono !== "") {
+      tablaAbonoExtra = parseFloat(abono.replace(/\./g, "").replace(",", "."));
+    } else {
+      tablaAbonoExtra = 0;
+    }
 
-   if (abono !== "") {
-     tablaAbonoExtra = parseFloat(abono.replace(/\./g, "").replace(",", "."));
-   } else {
-     tablaAbonoExtra = 0;
-   }
+    let pagoRestante = tablaMontoTotal;
 
-   let pagoRestante = tablaMontoTotal;
+    for (let i = 1; i <= tablaTiempo; i++) {
+      const pagoIntereses = pagoRestante * ((tablaInteres/12) / 100);
+      let pagoTotal;
+      let pagoPrincipal;
 
-   for (let i = 1; i <= tablaTiempo; i++) {
-     const pagoIntereses = pagoRestante * ((tablaInteres/12) / 100);
-     let pagoTotal;
-     let pagoPrincipal;
+      if (i !== tablaTiempo) {
+        pagoTotal = parseFloat(cuotaMensual.replace(/\./g, "").replace(",", "."))/100;
+        
+        pagoPrincipal =  pagoTotal-pagoIntereses;
 
-     if (i !== tablaTiempo) {
-       pagoTotal = parseFloat(cuotaMensual.replace(/\./g, "").replace(",", "."))/100;
-       
-       pagoPrincipal =  pagoTotal-pagoIntereses;
+        pagoRestante -= pagoPrincipal;
+      } else {
+        pagoPrincipal =  pagoRestante;
 
-       pagoRestante -= pagoPrincipal;
-     } else {
-       pagoPrincipal =  pagoRestante;
+        pagoTotal = pagoPrincipal+pagoIntereses;
+        pagoRestante = 0;
+      }
+      
 
-       pagoTotal = pagoPrincipal+pagoIntereses;
-       pagoRestante = 0;
-     }
-     
+      const pago = {
+        mes: i,
+        principal: pagoPrincipal
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+      };
+      tablaPagos.push(pago);
+    }
 
-     const pago = {
-       mes: i,
-       principal: pagoPrincipal
-         .toFixed(2)
-         .replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-       interes: pagoIntereses.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-       total: pagoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-       saldo: pagoRestante.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-     };
-     
-     
+    setTiempoPago(tablaPagos);
+  };
 
-     tablaPagos.push(pago);
-     
-     
-   }
+  const handleClick = () => {
+    setShowPopup(true);
+  };
 
-   setTiempoPago(tablaPagos);
- };
+  <Button onPress={handleClick} title="Tabla de Pagos" />;
 
- <FlatList
-   data={tiempoPago}
-   keyExtractor={(item) => item.mes.toString()}
-   renderItem={({ item }) => (
-     <View>
-       <Text>Mes: {item.mes} </Text>
-       <Text>Principal: {item.principal} </Text>
-       <Text>Interes: {item.interes} </Text>
-       <Text>Pago Total: {item.total} </Text>
-       <Text>Saldo: {item.saldo} </Text>
-     </View>
-   )}
- />;
- const handleClick = () => {
-   setShowPopup(true);
- };
+  const solicitarPermisos = async () => {
+    const { status } = await FileSystem.requestPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se requieren permisos para descargar el archivo.');
+      return false;
+    }
+    return true;
+  };
 
- <Button onPress={handleClick} title="Tabla de Pagos" />;
+  // Función para descargar la tabla en formato CSV
+  const descargarCSV = async () => {
+    const { status } = await MediaLibrary.getPermissionsAsync(writeOnly);
+  
+    if (status !== 'granted') {
+      console.error('Permission to write to external storage denied');
+      return;
+    }
+  
+    const path = `${FileSystem.documentDirectory}tabla_amortizacion.csv`;
+    let csvData = 'Mes,Principal,Interes,Total,Saldo\n';
+  
+    tiempoPago.forEach((pago) => {
+      csvData += `${pago.mes},${pago.principal.replace(',', '')},${pago.interes.replace(',', '')},${pago.total.replace(',', '')},${pago.saldo.replace(',', '')}\n`;
+    });
+  
+    try {
+      await FileSystem.writeAsStringAsync(path, csvData, { encoding: FileSystem.EncodingType.UTF8 });
+      alert('Tabla de amortización descargada correctamente.');
+    } catch (error) {
+      console.error('Error al escribir el archivo:', error.message || error);
+    }
+  };
 
-
- // Función para descargar la tabla en formato CSV
- const descargarCSV = async () => {
-   const path = `${FileSystem.documentDirectory}tabla_amortizacion.csv`;
-   let csvData = 'Mes,Principal,Interes,Total,Saldo\n';
-
-   tiempoPago.forEach((pago) => {
-     csvData += `${pago.mes},${pago.principal.replace(',', '')},${pago.interes.replace(',', '')},${pago.total.replace(',', '')},${pago.saldo.replace(',', '')}\n`;
-   });
-
-   try {
-     await FileSystem.writeAsStringAsync(path, csvData, { encoding: FileSystem.EncodingType.UTF8 });
-     alert('Tabla de amortización descargada correctamente.');
-   } catch (error) {
-     console.error('Error al escribir el archivo:', error.message || error);
-   }
- };
-
- //Fin de lógica de tabla de amortizaciones
+  //Fin de lógica de tabla de amortizaciones
 
   const borrar = () => {
     setMonto("");
@@ -273,6 +268,7 @@ const Calculadora = () => {
     setMostrarResultados(false);
     setMostrarAbono(false);
   };
+
 
   return (
     <View style={styles.container}>
