@@ -161,7 +161,7 @@ const Calculadora = () => {
 
   const [tiempoPago, setTiempoPago] = useState([]);
 
-  const calcularTiempoPago = () => {
+  const calcularTiempoPago = async () => {
     const tablaPagos = [];
     const tablaMontoTotal = parseFloat(
       monto.replace(/\./g, "").replace(",", ".")
